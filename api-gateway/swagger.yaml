@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: National Vehicle Registry API
+  description: Official API documentation for the NVR microservices platform
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+    description: Local Development
+tags:
+  - name: Auth
+  - name: Vehicles
+  - name: Admin
+  - name: Public
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Vehicle:
+      type: object
+      properties:
+        id: { type: integer }
+        owner_name: { type: string }
+        national_id: { type: string }
+        phone: { type: string }
+        make: { type: string }
+        model: { type: string }
+        year: { type: integer }
+        color: { type: string }
+        plate_number: { type: string }
+        status: { type: string, enum: [pending, approved, rejected] }
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string, example: staff@nvr.gov }
+                password: { type: string, example: Admin@1234 }
+      responses:
+        '200': { description: JWT token }
+        '401': { description: Invalid credentials }
+  /public/verify/{plate}:
+    get:
+      tags: [Public]
+      summary: Verify plate (no auth)
+      parameters:
+        - name: plate
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Vehicle found }
+        '404': { description: Not found }
