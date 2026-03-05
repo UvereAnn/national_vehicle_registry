@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: nvr-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: nvr_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/migrate.sql:/docker-entrypoint-initdb.d/02-migrate.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - nvr-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: nvr-auth
+    environment:
+      PORT: 3001
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: nvr_db
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "3001:3001"
+    networks:
+      - nvr-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  vehicle-service:
+    build:
+      context: ./vehicle-service
+      dockerfile: Dockerfile
+    container_name: nvr-vehicle
+    environment:
+      PORT: 3002
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: nvr_db
+      PLATE_SERVICE_URL: http://plate-service:3003
+    ports:
+      - "3002:3002"
+    networks:
+      - nvr-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  plate-service:
+    build:
+      context: ./plate-service
+      dockerfile: Dockerfile
+    container_name: nvr-plate
+    environment:
+      PORT: 3003
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: nvr_db
+    ports:
+      - "3003:3003"
+    networks:
+      - nvr-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: nvr-gateway
+    environment:
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_SERVICE_URL: http://auth-service:3001
+      VEHICLE_SERVICE_URL: http://vehicle-service:3002
+      PLATE_SERVICE_URL: http://plate-service:3003
+      FRONTEND_URL: http://localhost
+    ports:
+      - "3000:3000"
+    networks:
+      - nvr-network
+    depends_on:
+      - auth-service
+      - vehicle-service
+      - plate-service
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nvr-frontend
+    ports:
+      - "80:80"
+    networks:
+      - nvr-network
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+networks:
+  nvr-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local

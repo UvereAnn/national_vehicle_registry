@@ -61,9 +61,9 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 
 -- Sample Data
 INSERT INTO users (name, email, password, role) VALUES
-('Super Admin', 'superadmin@nvr.gov', '$2b$10$rQZ9uAVQMTXHOgAhQzP0x.8YpRRxHvZAD6TJqYfIoiJHHmkLdv5Oy', 'super_admin'),
-('Admin Officer', 'admin@nvr.gov', '$2b$10$rQZ9uAVQMTXHOgAhQzP0x.8YpRRxHvZAD6TJqYfIoiJHHmkLdv5Oy', 'admin_officer'),
-('John Staff', 'staff@nvr.gov', '$2b$10$rQZ9uAVQMTXHOgAhQzP0x.8YpRRxHvZAD6TJqYfIoiJHHmkLdv5Oy', 'registration_staff');
+('Super Admin', 'superadmin@nvr.gov', '$2a$10$2NOk/zN/DwojIgInQExInua4Cr5mInoy2EyxWZMBwQg8LiaYdcJii', 'super_admin'),
+('Admin Officer', 'admin@nvr.gov', '$2a$10$2NOk/zN/DwojIgInQExInua4Cr5mInoy2EyxWZMBwQg8LiaYdcJii', 'admin_officer'),
+('John Staff', 'staff@nvr.gov', '$2a$10$2NOk/zN/DwojIgInQExInua4Cr5mInoy2EyxWZMBwQg8LiaYdcJii', 'registration_staff');
 -- Password for all sample users: Admin@1234
 
 INSERT INTO vehicles (owner_name, national_id, phone, address, make, model, year, color, engine_number, chassis_number, plate_number, status, submitted_by, reviewed_by) VALUES

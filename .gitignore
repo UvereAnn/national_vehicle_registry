@@ -8,6 +8,7 @@ plate-service/venv/
 # Environment variables (sensitive!)
 .env
 */.env
+.env.docker
 
 # Build output
 frontend/dist/
@@ -20,5 +21,6 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-#setup guide
-.docx
+# Documentation files (local only)
+NVR_Setup_Guide.docx
+NVR_DevOps_Guide_v2.zip
