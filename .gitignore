@@ -35,3 +35,4 @@ NVR_DevOps_Guide_v2.zip
 *.tfstate.*
 **/.terraform.lock.hcl
 argocd
+venv/
