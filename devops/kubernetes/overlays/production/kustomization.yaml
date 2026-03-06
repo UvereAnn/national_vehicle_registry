@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: nvr-production
+resources:
+- ../../base
+- namespace.yaml
+- configmap.yaml
+- secrets.yaml
+patches:
+- path: patch-api-gateway.yaml
+- path: patch-auth-service.yaml
+- path: patch-vehicle-service.yaml
+- path: patch-plate-service.yaml
+- path: patch-frontend.yaml
+- path: ingress-patch.yaml
+images:
+- name: 954377119665.dkr.ecr.eu-north-1.amazonaws.com/nvr/api-gateway
+  newTag: stable
+- name: 954377119665.dkr.ecr.eu-north-1.amazonaws.com/nvr/auth-service
+  newTag: stable
+- name: 954377119665.dkr.ecr.eu-north-1.amazonaws.com/nvr/vehicle-service
+  newTag: stable
+- name: 954377119665.dkr.ecr.eu-north-1.amazonaws.com/nvr/plate-service
+  newTag: stable
+- name: 954377119665.dkr.ecr.eu-north-1.amazonaws.com/nvr/frontend
+  newTag: stable

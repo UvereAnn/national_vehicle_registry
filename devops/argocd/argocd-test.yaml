@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nvr-test
+  namespace: argocd
+  labels:
+    environment: test
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/UvereAnn/national_vehicle_registry
+    targetRevision: main
+    path: devops/kubernetes/overlays/test
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: nvr-test
+  syncPolicy:
+    automated:
+      prune: true       # Remove deleted resources
+      selfHeal: true    # Fix manual changes automatically
+    syncOptions:
+    - CreateNamespace=true

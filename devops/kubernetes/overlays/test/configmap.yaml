@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nvr-config
+  namespace: nvr-test
+data:
+  # ⚠️ Replace with your TEST RDS endpoint from terraform output
+  DB_HOST: "nvr-mysql-test.cxu48ymoqdks.eu-north-1.rds.amazonaws.com"
+  DB_NAME: "nvr_test"
+  DB_USER: "admin"
+  AUTH_SERVICE_URL: "http://auth-service:3001"
+  VEHICLE_SERVICE_URL: "http://vehicle-service:3002"
+  PLATE_SERVICE_URL: "http://plate-service:3003"
+  FRONTEND_URL: "https://test.nvr.yourdomain.com"
+  NODE_ENV: "test"
