@@ -24,3 +24,13 @@ Thumbs.db
 # Documentation files (local only)
 NVR_Setup_Guide.docx
 NVR_DevOps_Guide_v2.zip
+
+# Terraform
+**/.terraform/
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/terraform.tfvars
+*.tfvars
+*.tfstate
+*.tfstate.*
+**/.terraform.lock.hcl
