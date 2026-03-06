@@ -1,0 +1,172 @@
+pipeline {
+  agent any
+
+  environment {
+    AWS_REGION   = 'eu-north-1'
+    ECR_REGISTRY = '954377119665.dkr.ecr.eu-north-1.amazonaws.com'
+    IMAGE_TAG    = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.take(7) ?: 'latest'}"
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        checkout scm
+        echo "🔍 Branch: ${env.BRANCH_NAME} | Tag: ${IMAGE_TAG}"
+      }
+    }
+
+    stage('Trivy Filesystem Scan') {
+      steps {
+        sh '''
+          trivy fs . \
+            --severity HIGH,CRITICAL \
+            --exit-code 0 \
+            --format table \
+            -o trivy-fs-report.txt || true
+          cat trivy-fs-report.txt
+        '''
+      }
+      post {
+        always { archiveArtifacts artifacts: 'trivy-fs-report.txt' }
+      }
+    }
+
+    stage('Build Docker Images') {
+      steps {
+        script {
+          def services = ['api-gateway', 'auth-service', 'vehicle-service', 'plate-service', 'frontend']
+          services.each { service ->
+            sh """
+              docker build \
+                -t ${ECR_REGISTRY}/nvr/${service}:${IMAGE_TAG} \
+                -t ${ECR_REGISTRY}/nvr/${service}:latest \
+                ./${service}/
+            """
+          }
+        }
+      }
+    }
+
+    stage('Trivy Image Scan') {
+      steps {
+        script {
+          def services = ['api-gateway', 'auth-service', 'vehicle-service', 'plate-service', 'frontend']
+          services.each { service ->
+            sh """
+              trivy image \
+                --severity HIGH,CRITICAL \
+                --exit-code 0 \
+                --format table \
+                ${ECR_REGISTRY}/nvr/${service}:${IMAGE_TAG} \
+                -o trivy-${service}-report.txt || true
+            """
+          }
+        }
+      }
+      post {
+        always { archiveArtifacts artifacts: 'trivy-*-report.txt' }
+      }
+    }
+
+    stage('Push to ECR') {
+      steps {
+        withAWS(credentials: 'aws-credentials', region: env.AWS_REGION) {
+          sh """
+            aws ecr get-login-password --region ${AWS_REGION} | \
+              docker login --username AWS --password-stdin ${ECR_REGISTRY}
+          """
+          script {
+            def services = ['api-gateway', 'auth-service', 'vehicle-service', 'plate-service', 'frontend']
+            services.each { service ->
+              sh """
+                docker push ${ECR_REGISTRY}/nvr/${service}:${IMAGE_TAG}
+                docker push ${ECR_REGISTRY}/nvr/${service}:latest
+              """
+            }
+          }
+        }
+      }
+    }
+
+    stage('Deploy to TEST') {
+      steps {
+        sh """
+          sed -i 's|newTag: .*|newTag: ${IMAGE_TAG}|g' \
+            devops/kubernetes/overlays/test/kustomization.yaml
+        """
+        withCredentials([usernamePassword(
+          credentialsId: 'github-credentials',
+          usernameVariable: 'GIT_USER',
+          passwordVariable: 'GIT_TOKEN'
+        )]) {
+          sh """
+            git config user.email "jenkins@nvr.gov"
+            git config user.name "Jenkins CI"
+            git add devops/kubernetes/overlays/test/
+            git diff --staged --quiet || \
+              git commit -m "ci: deploy ${IMAGE_TAG} to test [skip ci]"
+            git push https://\${GIT_USER}:\${GIT_TOKEN}@github.com/UvereAnn/national_vehicle_registry.git main
+          """
+        }
+        echo "✅ TEST environment deployed: ${IMAGE_TAG}"
+      }
+    }
+
+    stage('Approve Production Deploy') {
+      steps {
+        timeout(time: 24, unit: 'HOURS') {
+          input(
+            message: "🚀 Deploy ${IMAGE_TAG} to PRODUCTION?",
+            ok: "Yes — Deploy to Production"
+          )
+        }
+      }
+    }
+
+    stage('Tag as Stable & Push') {
+      steps {
+        withAWS(credentials: 'aws-credentials', region: env.AWS_REGION) {
+          script {
+            def services = ['api-gateway', 'auth-service', 'vehicle-service', 'plate-service', 'frontend']
+            services.each { service ->
+              sh """
+                docker tag ${ECR_REGISTRY}/nvr/${service}:${IMAGE_TAG} \
+                           ${ECR_REGISTRY}/nvr/${service}:stable
+                docker push ${ECR_REGISTRY}/nvr/${service}:stable
+              """
+            }
+          }
+        }
+      }
+    }
+
+    stage('Deploy to PRODUCTION') {
+      steps {
+        sh """
+          sed -i 's|newTag: .*|newTag: stable|g' \
+            devops/kubernetes/overlays/production/kustomization.yaml
+        """
+        withCredentials([usernamePassword(
+          credentialsId: 'github-credentials',
+          usernameVariable: 'GIT_USER',
+          passwordVariable: 'GIT_TOKEN'
+        )]) {
+          sh """
+            git add devops/kubernetes/overlays/production/
+            git diff --staged --quiet || \
+              git commit -m "ci: promote ${IMAGE_TAG} to production as stable [skip ci]"
+            git push https://\${GIT_USER}:\${GIT_TOKEN}@github.com/UvereAnn/national_vehicle_registry.git main
+          """
+        }
+        echo "🎉 PRODUCTION deployment complete!"
+      }
+    }
+  }
+
+  post {
+    success { echo "✅ Pipeline complete! ${IMAGE_TAG} is live." }
+    failure { echo "❌ Pipeline FAILED. Check logs above." }
+    always  { cleanWs() }
+  }
+}
