@@ -15,12 +15,12 @@ patches:
 - path: ingress-patch.yaml
 images:
 - name: 954377119665.dkr.ecr.eu-north-1.amazonaws.com/nvr/api-gateway
-  newTag: 5-b072ed3
+  newTag: 8-efea7b2
 - name: 954377119665.dkr.ecr.eu-north-1.amazonaws.com/nvr/auth-service
-  newTag: 5-b072ed3
+  newTag: 8-efea7b2
 - name: 954377119665.dkr.ecr.eu-north-1.amazonaws.com/nvr/vehicle-service
-  newTag: 5-b072ed3
+  newTag: 8-efea7b2
 - name: 954377119665.dkr.ecr.eu-north-1.amazonaws.com/nvr/plate-service
-  newTag: 5-b072ed3
+  newTag: 8-efea7b2
 - name: 954377119665.dkr.ecr.eu-north-1.amazonaws.com/nvr/frontend
-  newTag: 5-b072ed3
+  newTag: 8-efea7b2
