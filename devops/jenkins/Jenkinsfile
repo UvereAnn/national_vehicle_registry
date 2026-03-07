@@ -16,6 +16,28 @@ pipeline {
       }
     }
 
+    stage('SonarQube Analysis') {
+      steps {
+        withSonarQubeEnv('SonarQube') {
+          script {
+            def scannerHome = tool 'SonarScanner'
+            sh """
+              cp devops/sonarqube/sonar-project.properties .
+              ${scannerHome}/bin/sonar-scanner
+            """
+          }
+        }
+      }
+    }
+
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: false
+        }
+      }
+    }
+
     stage('Trivy Filesystem Scan') {
       steps {
         sh '''
