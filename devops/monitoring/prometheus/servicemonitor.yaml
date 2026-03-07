@@ -1,0 +1,39 @@
+# ServiceMonitor for TEST environment
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nvr-test-monitor
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: nvr
+  namespaceSelector:
+    matchNames:
+    - nvr-test
+  endpoints:
+  - port: http
+    path: /health
+    interval: 30s
+---
+# ServiceMonitor for PRODUCTION environment
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nvr-production-monitor
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: nvr
+  namespaceSelector:
+    matchNames:
+    - nvr-production
+  endpoints:
+  - port: http
+    path: /health
+    interval: 15s   # More frequent for production

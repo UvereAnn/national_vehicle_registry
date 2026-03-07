@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nvr-grafana-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  nvr-dashboard.json: |
+    {
+      "title": "NVR - National Vehicle Registry (All Environments)",
+      "uid": "nvr-main",
+      "timezone": "browser",
+      "refresh": "30s",
+      "templating": {
+        "list": [{
+          "name": "namespace",
+          "type": "custom",
+          "options": [
+            {"text": "nvr-test", "value": "nvr-test"},
+            {"text": "nvr-production", "value": "nvr-production"}
+          ],
+          "current": {"text": "nvr-production", "value": "nvr-production"}
+        }]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Service Health — $namespace",
+          "type": "stat",
+          "gridPos": {"h": 4, "w": 24, "x": 0, "y": 0},
+          "targets": [{
+            "expr": "up{namespace=\"$namespace\"}",
+            "legendFormat": "{{pod}}"
+          }],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "steps": [
+                  {"color": "red", "value": 0},
+                  {"color": "green", "value": 1}
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 2,
+          "title": "TEST — Pod Health",
+          "type": "stat",
+          "gridPos": {"h": 4, "w": 12, "x": 0, "y": 4},
+          "targets": [{"expr": "up{namespace=\"nvr-test\"}"}]
+        },
+        {
+          "id": 3,
+          "title": "PRODUCTION — Pod Health",
+          "type": "stat",
+          "gridPos": {"h": 4, "w": 12, "x": 12, "y": 4},
+          "targets": [{"expr": "up{namespace=\"nvr-production\"}"}]
+        },
+        {
+          "id": 4,
+          "title": "CPU Usage — $namespace",
+          "type": "timeseries",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+          "targets": [{
+            "expr": "rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",container!=\"\"}[5m])",
+            "legendFormat": "{{container}}"
+          }]
+        },
+        {
+          "id": 5,
+          "title": "Memory Usage — $namespace",
+          "type": "timeseries",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+          "targets": [{
+            "expr": "container_memory_usage_bytes{namespace=\"$namespace\",container!=\"\"}",
+            "legendFormat": "{{container}}"
+          }]
+        },
+        {
+          "id": 6,
+          "title": "Pod Restarts — $namespace",
+          "type": "stat",
+          "gridPos": {"h": 4, "w": 24, "x": 0, "y": 16},
+          "targets": [{
+            "expr": "kube_pod_container_status_restarts_total{namespace=\"$namespace\"}",
+            "legendFormat": "{{pod}}"
+          }]
+        }
+      ]
+    }
