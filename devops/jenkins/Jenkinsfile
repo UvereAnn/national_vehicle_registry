@@ -106,7 +106,7 @@ pipeline {
             git add devops/kubernetes/overlays/test/
             git diff --staged --quiet || \
               git commit -m "ci: deploy ${IMAGE_TAG} to test [skip ci]"
-            git push https://\${GIT_USER}:\${GIT_TOKEN}@github.com/UvereAnn/national_vehicle_registry.git main
+            git push https://\${GIT_USER}:\${GIT_TOKEN}@github.com/UvereAnn/national_vehicle_registry.git HEAD:main
           """
         }
         echo "✅ TEST environment deployed: ${IMAGE_TAG}"
@@ -156,7 +156,7 @@ pipeline {
             git add devops/kubernetes/overlays/production/
             git diff --staged --quiet || \
               git commit -m "ci: promote ${IMAGE_TAG} to production as stable [skip ci]"
-            git push https://\${GIT_USER}:\${GIT_TOKEN}@github.com/UvereAnn/national_vehicle_registry.git main
+            git push https://\${GIT_USER}:\${GIT_TOKEN}@github.com/UvereAnn/national_vehicle_registry.git HEAD:main
           """
         }
         echo "🎉 PRODUCTION deployment complete!"
