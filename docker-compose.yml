@@ -1,4 +1,5 @@
 # docker-compose.yml
+
 version: '3.8'
 
 services:
@@ -19,6 +20,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  auth-service:
+    build: ./auth-service
+    container_name: nvr-auth-service
+    environment:
+      MONGODB_URI: mongodb://root:localdevpassword@mongodb:27017/nvr_db?authSource=admin
+      JWT_SECRET: nvr-jwt-secret-key-2024
+      PORT: 3001
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
 
 volumes:
   mongo_data:
