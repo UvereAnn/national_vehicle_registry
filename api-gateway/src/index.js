@@ -88,6 +88,33 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', service: 'api-gateway' });
 });
 
+// ── /api/vehicles — requires token, staff see only their own submissions ──
+app.use('/api/vehicles', verifyToken, withUserHeaders, createProxyMiddleware({
+  target: process.env.VEHICLE_SERVICE_URL || 'http://localhost:3002',
+  changeOrigin: true,
+  // No pathRewrite — vehicle-service mounts at the full /api/vehicles path
+  proxyTimeout: 10000,
+  timeout: 10000,
+}));
+
+// ── /api/public — no token required (public plate verification) ──
+app.use('/api/public', createProxyMiddleware({
+  target: process.env.VEHICLE_SERVICE_URL || 'http://localhost:3002',
+  changeOrigin: true,
+  // No pathRewrite — vehicle-service mounts at the full /api/public path
+  proxyTimeout: 10000,
+  timeout: 10000,
+}));
+
+// ── /api/stats — requires token (admin dashboard) ──
+app.use('/api/stats', verifyToken, withUserHeaders, createProxyMiddleware({
+  target: process.env.VEHICLE_SERVICE_URL || 'http://localhost:3002',
+  changeOrigin: true,
+  // No pathRewrite — vehicle-service mounts at the full /api/stats path
+  proxyTimeout: 10000,
+  timeout: 10000,
+}));
+
 app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
 
 app.listen(PORT, '0.0.0.0', () => {
