@@ -115,6 +115,15 @@ app.use('/api/stats', verifyToken, withUserHeaders, createProxyMiddleware({
   timeout: 10000,
 }));
 
+// ── /api/plates — public plate verification through gateway ──
+app.use('/api/plates', createProxyMiddleware({
+  target: process.env.PLATE_SERVICE_URL || 'http://localhost:3003',
+  changeOrigin: true,
+  // No pathRewrite — plate-service mounts /api/plates/verify at the full path
+  proxyTimeout: 10000,
+  timeout: 10000,
+}));
+
 app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
 
 app.listen(PORT, '0.0.0.0', () => {
