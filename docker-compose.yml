@@ -74,5 +74,13 @@ services:
     ports:
       - "3003:3003"
 
+  frontend:
+    build: ./frontend
+    container_name: nvr-frontend
+    depends_on:
+      - api-gateway
+    ports:
+      - "8080:80"
+
 volumes:
   mongo_data:
