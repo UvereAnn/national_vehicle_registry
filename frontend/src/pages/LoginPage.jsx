@@ -16,11 +16,9 @@ export default function LoginPage() {
     try {
       const user = await login(form.email, form.password)
       toast.success(`Welcome back, ${user.name}!`)
-      if (['admin', 'superadmin'].includes(user.role)) {
-        navigate('/admin')
-      } else {
-        navigate('/staff')
-      }
+      
+      // Let RoleRedirect handle where the user lands based on their token state
+      navigate('/dashboard')   
     } catch (err) {
       const status = err.response?.status
       if (status === 401) toast.error('❌ Incorrect email or password.')
