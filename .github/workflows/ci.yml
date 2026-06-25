@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # Pin v4.2.2
         with:
           fetch-depth: 0   # SonarCloud needs full git history for accurate blame/analysis
 
@@ -26,7 +26,7 @@ jobs:
         run: cp devops/sonarqube/sonar-project.properties .
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarcloud-github-action@cb2da3b4d1a8af962b9d3b51d48c2e646272de35 # Pin v3.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -37,10 +37,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # Pin v4.2.2
 
       - name: Run Trivy filesystem scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@18f2514ee49ffefd60627f6cf554f27574b693bc # Pin v0.29.0
         with:
           scan-type: fs
           scan-ref: .
@@ -59,13 +59,13 @@ jobs:
       fail-fast: false   # if one service's scan fails, others still run
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # Pin v4.2.2
 
       - name: Build ${{ matrix.service }} image
         run: docker build -t ${{ matrix.service }}:ci ./${{ matrix.service }}/
 
       - name: Trivy image scan — ${{ matrix.service }}
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@18f2514ee49ffefd60627f6cf554f27574b693bc # Pin v0.29.0
         with:
           image-ref: ${{ matrix.service }}:ci
           severity: HIGH,CRITICAL

@@ -14,25 +14,24 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # 👈 Required for Workload Identity Federation
+      id-token: write # Required for Workload Identity Federation
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # Pin v4.2.2
 
-      # 👇 Updated to use your secure keyless login variables!
+      # Updated to use secure keyless login via immutable commit SHAs
       - name: Authenticate to GCP (Keyless)
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@71fee32a0bb7e97b4d33d548e7d957010649d8fa # Pin v2.1.8
         with:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@e303195312f6628ecb327d3f9f21b13dd62c441c # Pin v2.1.1
         with:
-          project_id: ${{ vars.GCP_PROJECT_ID }} # 👈 Pulling from your repo variable
+          project_id: ${{ vars.GCP_PROJECT_ID }}
 
-      # 👇 Updated all secrets.GCP_PROJECT_ID calls to use vars.GCP_PROJECT_ID
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
 
@@ -41,7 +40,6 @@ jobs:
 
       # ── Build & push each service ──────────────────────────────────
 
-      # NOTE: Changed instances of secrets.GCP_PROJECT_ID below to vars.GCP_PROJECT_ID
       - name: Build & push auth-service
         run: |
           docker build \
