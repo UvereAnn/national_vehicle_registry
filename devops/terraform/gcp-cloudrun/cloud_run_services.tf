@@ -220,7 +220,7 @@ resource "google_cloud_run_v2_service" "api_gateway" {
 
       env {
         name  = "FRONTEND_URL"
-        value = google_cloud_run_v2_service.frontend.uri
+        value = "https://nationalvehicleregistry.com.ng"
       }
 
       env {
