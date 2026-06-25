@@ -26,7 +26,7 @@ jobs:
         run: cp devops/sonarqube/sonar-project.properties .
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@cb2da3b4d1a8af962b9d3b51d48c2e646272de35 # Pin v3.1.0
+        uses: SonarSource/sonarcloud-github-action@02ef91109b2d5813d8b7280b855e2d62400e2f23 # Pin v3.1.2 (Correct Casing)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # Pin v4.2.2
 
       - name: Run Trivy filesystem scan
-        uses: aquasecurity/trivy-action@18f2514ee49ffefd60627f6cf554f27574b693bc # Pin v0.29.0
+        uses: aquasecurity/trivy-action@696b804e638b13d4c0003023058b8590673057a1 # Pin v0.28.0 (Verified Hash)
         with:
           scan-type: fs
           scan-ref: .
@@ -65,7 +65,7 @@ jobs:
         run: docker build -t ${{ matrix.service }}:ci ./${{ matrix.service }}/
 
       - name: Trivy image scan — ${{ matrix.service }}
-        uses: aquasecurity/trivy-action@18f2514ee49ffefd60627f6cf554f27574b693bc # Pin v0.29.0
+        uses: aquasecurity/trivy-action@696b804e638b13d4c0003023058b8590673057a1 # Pin v0.28.0 (Verified Hash)
         with:
           image-ref: ${{ matrix.service }}:ci
           severity: HIGH,CRITICAL

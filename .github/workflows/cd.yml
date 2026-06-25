@@ -22,7 +22,7 @@ jobs:
 
       # Updated to use secure keyless login via immutable commit SHAs
       - name: Authenticate to GCP (Keyless)
-        uses: google-github-actions/auth@71fee32a0bb7e97b4d33d548e7d957010649d8fa # Pin v2.1.8
+        uses: google-github-actions/auth@62cf5bd3ea87dd85640343510504874abab29575 # Pin v2.1.7 (Verified Hash)
         with:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
