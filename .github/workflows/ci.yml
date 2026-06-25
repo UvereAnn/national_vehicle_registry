@@ -22,7 +22,7 @@ jobs:
         run: cp devops/sonarqube/sonar-project.properties .
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@cb2da3b4d1a8af962b9d3b51d48c2e646272de35
+        uses: SonarSource/sonarcloud-github-action@4f7a9b4c5b7d8f7c0f1c2a0d9f5e2b1a3c6d7e8f
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
