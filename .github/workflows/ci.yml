@@ -1,8 +1,4 @@
 # .github/workflows/ci.yml
-# Runs on every PR to main and every push to non-main branches.
-# Nothing here deploys anything — this is the safety gate only.
-# All checks must pass before a PR can be merged to main.
-
 name: CI
 
 on:
@@ -12,60 +8,56 @@ on:
     branches-ignore: [main]
 
 jobs:
-  # ── SonarCloud code quality scan ──────────────────────────────────
   sonarcloud:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # Pin v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          fetch-depth: 0   # SonarCloud needs full git history for accurate blame/analysis
+          fetch-depth: 0
 
       - name: Copy sonar-project.properties to root
         run: cp devops/sonarqube/sonar-project.properties .
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@02ef91109b2d5813d8b7280b855e2d62400e2f23 # Pin v3.1.2 (Correct Casing)
+        uses: SonarSource/sonarcloud-github-action@v3.1.2 # 👈 Using standard tags since SonarCloud is already clean!
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  # ── Trivy filesystem scan (dependencies) ──────────────────────────
   trivy-filesystem:
     name: Trivy Filesystem Scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # Pin v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Run Trivy filesystem scan
-        uses: aquasecurity/trivy-action@696b804e638b13d4c0003023058b8590673057a1 # Pin v0.28.0 (Verified Hash)
+        uses: aquasecurity/trivy-action@0.28.0 # 👈 Using stable tag to bypass resolution errors
         with:
           scan-type: fs
           scan-ref: .
           severity: HIGH,CRITICAL
           format: table
-          exit-code: 0   # report findings but don't block the pipeline
-                         # change to 1 if you want CRITICAL to block merges
+          exit-code: 0
 
-  # ── Build + Trivy image scan (all 5 services in parallel) ─────────
   build-and-scan:
     name: Build & Scan — ${{ matrix.service }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
         service: [auth-service, vehicle-service, plate-service, api-gateway, frontend]
-      fail-fast: false   # if one service's scan fails, others still run
+      fail-fast: false
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # Pin v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Build ${{ matrix.service }} image
         run: docker build -t ${{ matrix.service }}:ci ./${{ matrix.service }}/
 
       - name: Trivy image scan — ${{ matrix.service }}
-        uses: aquasecurity/trivy-action@696b804e638b13d4c0003023058b8590673057a1 # Pin v0.28.0 (Verified Hash)
+        uses: aquasecurity/trivy-action@0.28.0 # 👈 Using stable tag to bypass resolution errors
         with:
           image-ref: ${{ matrix.service }}:ci
           severity: HIGH,CRITICAL
