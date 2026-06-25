@@ -1,0 +1,73 @@
+# .github/workflows/ci.yml
+# Runs on every PR to main and every push to non-main branches.
+# Nothing here deploys anything — this is the safety gate only.
+# All checks must pass before a PR can be merged to main.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches-ignore: [main]
+
+jobs:
+  # ── SonarCloud code quality scan ──────────────────────────────────
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # SonarCloud needs full git history for accurate blame/analysis
+
+      - name: Copy sonar-project.properties to root
+        run: cp devops/sonarqube/sonar-project.properties .
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # ── Trivy filesystem scan (dependencies) ──────────────────────────
+  trivy-filesystem:
+    name: Trivy Filesystem Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          format: table
+          exit-code: 0   # report findings but don't block the pipeline
+                         # change to 1 if you want CRITICAL to block merges
+
+  # ── Build + Trivy image scan (all 5 services in parallel) ─────────
+  build-and-scan:
+    name: Build & Scan — ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [auth-service, vehicle-service, plate-service, api-gateway, frontend]
+      fail-fast: false   # if one service's scan fails, others still run
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build ${{ matrix.service }} image
+        run: docker build -t ${{ matrix.service }}:ci ./${{ matrix.service }}/
+
+      - name: Trivy image scan — ${{ matrix.service }}
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ matrix.service }}:ci
+          severity: HIGH,CRITICAL
+          format: table
+          exit-code: 0
