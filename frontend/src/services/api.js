@@ -1,13 +1,13 @@
 // frontend/src/services/api.js
-// Axios instance — base URL points to api-gateway.
-// In Docker: nginx proxies /api/* to api-gateway on port 3000.
-// In local dev (vite): vite.config.js proxies /api to localhost:3000.
-// Token is injected from localStorage on every request automatically.
+// VITE_API_URL is baked in at build time:
+//   Local Docker Compose: /api (nginx proxies /api/* to api-gateway)
+//   Cloud Run: https://api-gateway-xxxxx-uc.a.run.app/api
+//              (set as build arg during GitHub Actions cd.yml)
 
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
 })
 
 api.interceptors.request.use((config) => {
