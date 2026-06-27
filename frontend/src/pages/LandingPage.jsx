@@ -103,7 +103,7 @@ export default function LandingPage() {
             </div>
             <div className="p-4 bg-gray-50 rounded-xl">
               <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Headquarters</p>
-              <p className="text-sm font-semibold text-gray-800 mt-1">Registry Complex, Abuja, Nigeria</p>
+              <p className="text-sm font-semibold text-gray-800 mt-1">Registry Complex.</p>
             </div>
           </div>
         </div>

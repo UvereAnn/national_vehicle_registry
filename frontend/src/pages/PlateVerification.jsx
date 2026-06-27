@@ -40,29 +40,44 @@ export default function PlateVerification() {
           <form onSubmit={handleVerify} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Plate Number</label>
-              <input className="input-field text-center text-xl font-mono uppercase tracking-widest"
-                placeholder="ABC-1234" value={plate}
-                onChange={e => setPlate(e.target.value.toUpperCase())} required />
+              <input
+                className="input-field text-center text-xl font-mono uppercase tracking-widest"
+                placeholder="ABC-1234"
+                value={plate}
+                onChange={e => setPlate(e.target.value.toUpperCase())}
+                required
+              />
             </div>
             <button type="submit" disabled={loading} className="btn-primary w-full py-3">
               {loading ? 'Verifying...' : '🔍 Verify Plate'}
             </button>
           </form>
 
-          {result && result.found && (
+          {result && result.valid && (
             <div className="mt-6 p-4 bg-green-50 rounded-xl border border-green-200">
               <p className="text-green-700 font-bold text-center mb-3">✅ Plate Registered</p>
               <div className="space-y-1 text-sm">
-                <div className="flex justify-between"><span className="text-gray-500">Owner</span><span className="font-medium">{result.vehicle.ownerName}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Make / Model</span><span className="font-medium">{result.vehicle.make} {result.vehicle.model}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Year</span><span className="font-medium">{result.vehicle.year}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Color</span><span className="font-medium">{result.vehicle.color}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Status</span><span className={`font-medium ${result.vehicle.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>{result.vehicle.status}</span></div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Plate Number</span>
+                  <span className="font-medium">{result.plate.plateNumber}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Status</span>
+                  <span className="font-medium text-green-600">{result.plate.status}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Issued</span>
+                  <span className="font-medium">{result.plate.issuedDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Expires</span>
+                  <span className="font-medium">{result.plate.expiryDate}</span>
+                </div>
               </div>
             </div>
           )}
 
-          {result && !result.found && (
+          {result && result.found === false && (
             <div className="mt-6 p-4 bg-red-50 rounded-xl border border-red-200 text-center">
               <p className="text-red-700 font-bold">❌ Plate Not Found</p>
               <p className="text-red-500 text-sm mt-1">This plate number is not registered in the system.</p>
