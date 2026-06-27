@@ -20,15 +20,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # Pin v4.2.2
 
-      # Updated to use secure keyless login via immutable commit SHAs
+      # ✅ FIXED SHA here ↓
       - name: Authenticate to GCP (Keyless)
-        uses: google-github-actions/auth@62cf5bd3ea87dd85640343510504874abab29575 # Pin v2.1.7 (Verified Hash)
+        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2.1.7
         with:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
+      # ✅ FIXED SHA here ↓
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@e303195312f6628ecb327d3f9f21b13dd62c441c # Pin v2.1.1
+        uses: google-github-actions/setup-gcloud@f0990588f1e5b5af6827153b93673613abdc6ec7 # v2.1.1
         with:
           project_id: ${{ vars.GCP_PROJECT_ID }}
 
