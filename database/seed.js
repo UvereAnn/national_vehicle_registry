@@ -10,6 +10,13 @@ const bcrypt = require('bcryptjs')
 const MONGODB_URI = process.env.MONGODB_URI ||
   'mongodb://root:localdevpassword@localhost:27017/nvr_db?authSource=admin'
 
+const SEED_PASSWORD = process.env.SEED_PASSWORD
+if (!SEED_PASSWORD) {
+  console.error('❌ SEED_PASSWORD environment variable is not set.')
+  console.error('   Create a .env.local file with SEED_PASSWORD=yourpassword')
+  process.exit(1)
+}
+
 const userSchema = new mongoose.Schema({
   name: String, email: String, password: String,
   role: String, isActive: { type: Boolean, default: true }
@@ -30,12 +37,11 @@ async function seed() {
   await mongoose.connect(MONGODB_URI)
   console.log('Connected to MongoDB for seeding...')
 
-  // Clear existing data
   await User.deleteMany({})
   await Vehicle.deleteMany({})
   console.log('Cleared existing data')
 
-  const hashed = await bcrypt.hash('Admin@1234', 10)
+  const hashed = await bcrypt.hash(SEED_PASSWORD, 10)
 
   const staff = await User.create({
     name: 'Staff User', email: 'staff@nvr.gov',
@@ -80,13 +86,9 @@ async function seed() {
   ])
 
   console.log('✅ Created 3 sample vehicles in pending state')
-  console.log('\nDemo accounts:')
-  console.log('  staff@nvr.gov      / Admin@1234 (role: staff)')
-  console.log('  admin@nvr.gov      / Admin@1234 (role: admin)')
-  console.log('  superadmin@nvr.gov / Admin@1234 (role: superadmin)')
+  console.log('✅ Seed complete — check .env.local for credentials')
 
   await mongoose.disconnect()
-  console.log('\n✅ Seed complete')
 }
 
 seed().catch(err => {
