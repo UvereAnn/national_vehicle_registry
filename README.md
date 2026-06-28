@@ -302,9 +302,9 @@ This creates:
 
 | Email | Password | Role |
 |-------|----------|------|
-| `staff@nvr.gov` | `Admin@1234` | staff |
-| `admin@nvr.gov` | `Admin@1234` | admin |
-| `superadmin@nvr.gov` | `Admin@1234` | superadmin |
+| `staff@nvr.gov` | `` | staff |
+| `admin@nvr.gov` | `` | admin |
+| `superadmin@nvr.gov` | `` | superadmin |
 
 **4. Open the app**
 
