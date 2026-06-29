@@ -75,12 +75,15 @@ services:
       - "3003:3003"
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:3000/api
     container_name: nvr-frontend
     depends_on:
       - api-gateway
     ports:
-      - "8080:80"
+      - "8080:8080"
 
 volumes:
   mongo_data:

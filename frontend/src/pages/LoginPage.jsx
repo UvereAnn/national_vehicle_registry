@@ -53,11 +53,7 @@ export default function LoginPage() {
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-          <div className="mt-6 pt-4 border-t border-gray-100 text-center">
-            <p className="text-xs text-gray-500 mb-1 font-medium">Demo Credentials</p>
-            <p className="text-xs text-gray-400">Staff: staff@nvr.gov / REDACTED</p>
-            <p className="text-xs text-gray-400">Admin: admin@nvr.gov / REDACTED</p>
-          </div>
+          
         </div>
         <div className="text-center mt-4 flex justify-center gap-4">
           <Link to="/" className="text-primary-200 hover:text-white text-sm">← Back to Home</Link>
